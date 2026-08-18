@@ -1,5 +1,5 @@
 // ↓↓↓ Bump this number every time you deploy a change. That's the whole workflow. ↓↓↓
-const APP_VERSION = 1;
+const APP_VERSION = 2;
 const CACHE_NAME = `oboafo99-cache-v${APP_VERSION}`;
 const ASSETS = [
   './index.html',
