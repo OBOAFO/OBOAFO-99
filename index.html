@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>OBOAFO(99)</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05060A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-case:#201F24;
+    --bg-case-2:#17161A;
+    --bg-panel:#2B2A31;
+    --panel-edge:#403E47;
+    --lcd-bg:#CBD9AE;
+    --lcd-bg-2:#BFCE9F;
+    --lcd-fg:#2E3B22;
+    --lcd-fg-dim:#5C6B49;
+    --lcd-glow:rgba(150,178,105,0.45);
+    --accent-amber:#E0A458;
+    --accent-amber-dim:#B9863F;
+    --accent-teal:#5C8B84;
+    --accent-teal-dim:#456863;
+    --key-dark:#38363E;
+    --key-dark-hi:#454249;
+    --key-text:#EDEAE3;
+    --danger:#C1584A;
+    --danger-dim:#9C4438;
+    --mono:'JetBrains Mono', monospace;
+    --sans:'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px),
+      radial-gradient(circle at 30% 0%, #2a2930 0%, var(--bg-case-2) 70%);
+    font-family:var(--sans);
+    padding:24px;
+  }
+  .case{
+    width:380px;
+    max-width:100%;
+    background:linear-gradient(160deg, #262429, var(--bg-case) 40%, #1c1b20);
+    border-radius:26px;
+    padding:18px 16px 22px;
+    box-shadow:
+      0 30px 60px -20px rgba(0,0,0,0.7),
+      0 2px 0 rgba(255,255,255,0.04) inset,
+      0 -2px 0 rgba(0,0,0,0.4) inset;
+    position:relative;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    padding:2px 8px 12px;
+  }
+  .brand-name{
+    font-family:var(--sans);
+    font-weight:700;
+    letter-spacing:0.14em;
+    font-size:12px;
+    color:#8E8B92;
+    text-transform:uppercase;
+  }
+  .brand-tag{
+    font-family:var(--mono);
+    font-size:10px;
+    color:#5E5C64;
+    letter-spacing:0.05em;
+  }
+
+  /* LCD panel */
+  .lcd{
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 3px),
+      linear-gradient(155deg, var(--lcd-bg), var(--lcd-bg-2));
+    border-radius:12px;
+    padding:14px 16px 12px;
+    box-shadow:
+      inset 0 2px 6px rgba(0,0,0,0.35),
+      inset 0 0 22px var(--lcd-glow),
+      0 1px 0 rgba(255,255,255,0.06);
+    position:relative;
+    overflow:hidden;
+    border:1px solid #16200e33;
+  }
+  .lcd-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--lcd-fg-dim);
+    letter-spacing:0.08em;
+    margin-bottom:4px;
+    min-height:14px;
+  }
+  .lcd-tape{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--lcd-fg-dim);
+    min-height:16px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    text-align:right;
+    opacity:0.85;
+  }
+  .lcd-main{
+    font-family:var(--mono);
+    font-weight:500;
+    font-size:38px;
+    color:var(--lcd-fg);
+    text-align:right;
+    text-shadow:0 0 1px rgba(46,59,34,0.4);
+    line-height:1.15;
+    min-height:46px;
+    overflow-x:auto;
+    white-space:nowrap;
+    letter-spacing:0.01em;
+    padding-top:4px;
+    scrollbar-width:none;
+  }
+  .lcd-main::-webkit-scrollbar{display:none;}
+  .lcd-badges{
+    display:flex;
+    gap:8px;
+  }
+  .lcd-badge{
+    opacity:0.25;
+    transition:opacity 0.15s ease;
+  }
+  .lcd-badge.on{opacity:1;}
+
+  /* Controls row: mode toggle + memory */
+  .controls{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 6px 10px;
+    gap:8px;
+  }
+  .switch-group{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:var(--mono);
+    font-size:10px;
+    color:#8E8B92;
+    letter-spacing:0.06em;
+  }
+  .switch{
+    width:44px;
+    height:22px;
+    border-radius:11px;
+    background:var(--bg-case-2);
+    box-shadow:inset 0 2px 4px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03);
+    position:relative;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .switch-knob{
+    position:absolute;
+    top:2px; left:2px;
+    width:18px; height:18px;
+    border-radius:50%;
+    background:linear-gradient(160deg, #E0A458, #B9863F);
+    box-shadow:0 1px 3px rgba(0,0,0,0.5), 0 0 6px rgba(224,164,88,0.5);
+    transition:transform 0.18s cubic-bezier(.4,1.6,.5,1);
+  }
+  .switch.rad .switch-knob{transform:translateX(22px);}
+  .mem-indicator{
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--accent-teal);
+    letter-spacing:0.08em;
+    opacity:0.4;
+    transition:opacity 0.15s ease;
+  }
+  .mem-indicator.on{opacity:1;}
+
+  /* Keypad */
+  .keypad{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:7px;
+    padding:4px 4px 0;
+  }
+  button.key{
+    border:none;
+    border-radius:10px;
+    font-family:var(--mono);
+    font-weight:500;
+    font-size:15px;
+    color:var(--key-text);
+    background:linear-gradient(160deg, var(--key-dark-hi), var(--key-dark));
+    box-shadow:
+      0 2px 0 #1c1b20,
+      0 3px 4px rgba(0,0,0,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    padding:11px 0;
+    cursor:pointer;
+    transition:transform 0.06s ease, box-shadow 0.06s ease;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+  }
+  button.key:active, button.key.pressed{
+    transform:translateY(2px);
+    box-shadow:0 0 0 #1c1b20, inset 0 2px 4px rgba(0,0,0,0.4);
+  }
+  button.key.fn{
+    background:linear-gradient(160deg, #6a9c95, var(--accent-teal-dim));
+    color:#F4F6ED;
+    font-size:12.5px;
+  }
+  button.key.fn:active{box-shadow:0 0 0 #1c1b20, inset 0 2px 4px rgba(0,0,0,0.35);}
+  button.key.op{
+    background:linear-gradient(160deg, #EEB877, var(--accent-amber-dim));
+    color:#2A1B08;
+    font-size:17px;
+    font-weight:700;
+  }
+  button.key.op:active{box-shadow:0 0 0 #1c1b20, inset 0 2px 4px rgba(0,0,0,0.3);}
+  button.key.danger{
+    background:linear-gradient(160deg, #D06B5B, var(--danger-dim));
+    color:#FBEAE6;
+    font-size:13px;
+  }
+  button.key.wide{grid-column:span 2;}
+  button.key.eq{
+    background:linear-gradient(160deg, #EEB877, var(--accent-amber-dim));
+    color:#2A1B08;
+    font-size:19px;
+    font-weight:700;
+  }
+
+  /* History */
+  .history-wrap{
+    margin-top:12px;
+    padding:0 6px;
+  }
+  .history-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:var(--mono);
+    font-size:9px;
+    letter-spacing:0.12em;
+    color:#5E5C64;
+    text-transform:uppercase;
+    margin-bottom:4px;
+  }
+  .history-clear{
+    background:none;border:none;color:#5E5C64;font-family:var(--mono);font-size:9px;
+    letter-spacing:0.1em;cursor:pointer;text-transform:uppercase;
+  }
+  .history-clear:hover{color:#8E8B92;}
+  .history-list{
+    max-height:96px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column-reverse;
+    gap:2px;
+  }
+  .history-list::-webkit-scrollbar{width:4px;}
+  .history-list::-webkit-scrollbar-thumb{background:#403E47;border-radius:2px;}
+  .history-item{
+    display:flex;
+    justify-content:space-between;
+    font-family:var(--mono);
+    font-size:11px;
+    color:#8E8B92;
+    padding:3px 4px;
+    border-radius:5px;
+    cursor:pointer;
+  }
+  .history-item:hover{background:rgba(255,255,255,0.04); color:var(--key-text);}
+  .history-item .res{color:var(--accent-amber);}
+  .history-empty{
+    font-family:var(--mono);
+    font-size:10px;
+    color:#454349;
+    padding:6px 4px;
+    font-style:italic;
+  }
+
+  @media (max-width:400px){
+    .lcd-main{font-size:30px;}
+  }
+
+  /* Scan button */
+  .scan-row{
+    padding:2px 6px 10px;
+  }
+  button.scan-btn{
+    width:100%;
+    border:none;
+    border-radius:10px;
+    padding:11px 0;
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:13px;
+    letter-spacing:0.04em;
+    color:#F4F6ED;
+    background:linear-gradient(160deg, #6a9c95, var(--accent-teal-dim));
+    box-shadow:0 2px 0 #1c1b20, 0 3px 4px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  button.scan-btn:active{transform:translateY(2px); box-shadow:0 0 0 #1c1b20, inset 0 2px 4px rgba(0,0,0,0.4);}
+
+  /* Camera modal */
+  .scan-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(10,9,12,0.92);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    padding:20px;
+  }
+  .scan-modal.open{display:flex;}
+  .scan-panel{
+    width:100%;
+    max-width:360px;
+    background:var(--bg-case);
+    border-radius:18px;
+    padding:16px;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.7);
+  }
+  .scan-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+  }
+  .scan-title{
+    font-family:var(--sans);
+    font-weight:700;
+    font-size:13px;
+    color:var(--key-text);
+    letter-spacing:0.05em;
+  }
+  .scan-close{
+    background:none;
+    border:none;
+    color:#8E8B92;
+    font-size:20px;
+    cursor:pointer;
+    line-height:1;
+    padding:4px 8px;
+  }
+  .scan-video-wrap{
+    position:relative;
+    border-radius:12px;
+    overflow:hidden;
+    background:#000;
+    aspect-ratio:4/3;
+  }
+  #scan-video, #scan-canvas{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  #scan-canvas{display:none;}
+  .scan-hint{
+    font-family:var(--mono);
+    font-size:10px;
+    color:#8E8B92;
+    text-align:center;
+    margin-top:8px;
+    line-height:1.5;
+  }
+  .scan-actions{
+    display:flex;
+    gap:8px;
+    margin-top:12px;
+  }
+  .scan-actions button{
+    flex:1;
+    border:none;
+    border-radius:10px;
+    padding:11px 0;
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .scan-capture{
+    background:linear-gradient(160deg, #EEB877, var(--accent-amber-dim));
+    color:#2A1B08;
+  }
+  .scan-cancel{
+    background:var(--key-dark);
+    color:var(--key-text);
+  }
+  .scan-status{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--accent-teal);
+    text-align:center;
+    margin-top:10px;
+    min-height:14px;
+  }
+  .scan-review textarea{
+    width:100%;
+    margin-top:10px;
+    background:var(--lcd-bg);
+    color:var(--lcd-fg);
+    border:none;
+    border-radius:8px;
+    padding:10px;
+    font-family:var(--mono);
+    font-size:15px;
+    resize:none;
+    height:52px;
+  }
+  .scan-review-actions{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+  }
+  .scan-solve{
+    background:linear-gradient(160deg, #EEB877, var(--accent-amber-dim));
+    color:#2A1B08;
+  }
+  .scan-retake{
+    background:var(--key-dark);
+    color:var(--key-text);
+  }
+</style>
+</head>
+<body>
+
+<div class="case">
+  <div class="brand">
+    <span class="brand-name">OBOAFO(99)</span>
+    <span class="brand-tag">MODEL SC-1</span>
+  </div>
+
+  <div class="lcd">
+    <div class="lcd-row">
+      <div class="lcd-badges">
+        <span class="lcd-badge" id="badge-deg">DEG</span>
+        <span class="lcd-badge" id="badge-rad">RAD</span>
+        <span class="lcd-badge" id="badge-m">M</span>
+      </div>
+      <div class="lcd-badge" id="badge-err">ERROR</div>
+    </div>
+    <div class="lcd-tape" id="tape">&nbsp;</div>
+    <div class="lcd-main" id="display">0</div>
+  </div>
+
+  <div class="controls">
+    <div class="switch-group">
+      <span id="deg-label">DEG</span>
+      <div class="switch" id="angle-switch"><div class="switch-knob"></div></div>
+      <span id="rad-label" style="opacity:0.4">RAD</span>
+    </div>
+    <div class="mem-indicator" id="mem-label">MEMORY 0</div>
+  </div>
+
+  <div class="scan-row">
+    <button class="scan-btn" id="open-scan">📷 SCAN A QUESTION</button>
+  </div>
+
+  <div class="keypad" id="keypad">
+    <button class="key fn" data-act="mc">MC</button>
+    <button class="key fn" data-act="mr">MR</button>
+    <button class="key fn" data-act="mplus">M+</button>
+    <button class="key fn" data-act="mminus">M−</button>
+    <button class="key danger" data-act="clear">AC</button>
+
+    <button class="key fn" data-fn="sin(">sin</button>
+    <button class="key fn" data-fn="cos(">cos</button>
+    <button class="key fn" data-fn="tan(">tan</button>
+    <button class="key fn" data-fn="ln(">ln</button>
+    <button class="key fn" data-fn="log(">log</button>
+
+    <button class="key fn" data-fn="asin(">sin⁻¹</button>
+    <button class="key fn" data-fn="acos(">cos⁻¹</button>
+    <button class="key fn" data-fn="atan(">tan⁻¹</button>
+    <button class="key" data-ins="(">(</button>
+    <button class="key" data-ins=")">)</button>
+
+    <button class="key" data-ins="^2)" data-wrap="x²">x²</button>
+    <button class="key" data-fn="sqrt(">√</button>
+    <button class="key" data-ins="^">xʸ</button>
+    <button class="key" data-act="fact">n!</button>
+    <button class="key" data-act="backspace">⌫</button>
+
+    <button class="key" data-ins="7">7</button>
+    <button class="key" data-ins="8">8</button>
+    <button class="key" data-ins="9">9</button>
+    <button class="key op" data-ins="÷">÷</button>
+    <button class="key" data-ins="%">%</button>
+
+    <button class="key" data-ins="4">4</button>
+    <button class="key" data-ins="5">5</button>
+    <button class="key" data-ins="6">6</button>
+    <button class="key op" data-ins="×">×</button>
+    <button class="key" data-ins="1/(" data-close>1/x</button>
+
+    <button class="key" data-ins="1">1</button>
+    <button class="key" data-ins="2">2</button>
+    <button class="key" data-ins="3">3</button>
+    <button class="key op" data-ins="−">−</button>
+    <button class="key" data-ins="π">π</button>
+
+    <button class="key wide" data-ins="0">0</button>
+    <button class="key" data-ins=".">.</button>
+    <button class="key op" data-ins="+">+</button>
+    <button class="key eq" data-act="equals">=</button>
+  </div>
+
+  <div class="history-wrap">
+    <div class="history-head">
+      <span>History</span>
+      <button class="history-clear" id="clear-history">clear</button>
+    </div>
+    <div class="history-list" id="history-list">
+      <div class="history-empty">No calculations yet</div>
+    </div>
+  </div>
+</div>
+
+<div class="scan-modal" id="scan-modal">
+  <div class="scan-panel">
+    <div class="scan-head">
+      <span class="scan-title">SCAN A QUESTION</span>
+      <button class="scan-close" id="scan-close">✕</button>
+    </div>
+
+    <div class="scan-video-wrap">
+      <video id="scan-video" autoplay playsinline muted></video>
+      <canvas id="scan-canvas"></canvas>
+    </div>
+
+    <div class="scan-hint" id="scan-hint">Fill the frame with one printed expression, hold steady, good lighting.</div>
+
+    <div class="scan-actions" id="scan-capture-row">
+      <button class="scan-cancel" id="scan-cancel">Cancel</button>
+      <button class="scan-capture" id="scan-capture">Capture</button>
+    </div>
+
+    <div class="scan-status" id="scan-status"></div>
+
+    <div class="scan-review" id="scan-review" style="display:none">
+      <textarea id="scan-text" spellcheck="false"></textarea>
+      <div class="scan-review-actions">
+        <button class="scan-retake" id="scan-retake">Retake</button>
+        <button class="scan-solve" id="scan-solve">Insert &amp; Solve</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const display = document.getElementById('display');
+  const tape = document.getElementById('tape');
+  const keypad = document.getElementById('keypad');
+  const historyList = document.getElementById('history-list');
+  const badgeDeg = document.getElementById('badge-deg');
+  const badgeRad = document.getElementById('badge-rad');
+  const badgeM = document.getElementById('badge-m');
+  const badgeErr = document.getElementById('badge-err');
+  const angleSwitch = document.getElementById('angle-switch');
+  const degLabel = document.getElementById('deg-label');
+  const radLabel = document.getElementById('rad-label');
+  const memLabel = document.getElementById('mem-label');
+
+  let expr = '';
+  let angleMode = 'deg'; // 'deg' | 'rad'
+  let memory = 0;
+  let justEvaluated = false;
+  let history = [];
+
+  const DISPLAY_MAP = { '÷':'÷', '×':'×', '−':'−' };
+
+  function render(){
+    display.textContent = expr === '' ? '0' : expr;
+    display.scrollLeft = display.scrollWidth;
+    badgeDeg.classList.toggle('on', angleMode === 'deg');
+    badgeRad.classList.toggle('on', angleMode === 'rad');
+    badgeM.classList.toggle('on', memory !== 0);
+    memLabel.textContent = 'MEMORY ' + trimNum(memory);
+    memLabel.classList.toggle('on', memory !== 0);
+  }
+
+  function setError(msg){
+    badgeErr.style.opacity = 1;
+    display.textContent = msg || 'Error';
+    setTimeout(()=>{ badgeErr.style.opacity = 0.15; }, 900);
+  }
+
+  function trimNum(n){
+    if (!isFinite(n)) return n > 0 ? 'Infinity' : '-Infinity';
+    if (Number.isNaN(n)) return 'NaN';
+    let s = Math.abs(n) > 1e15 || (Math.abs(n) < 1e-9 && n !== 0)
+      ? n.toExponential(8)
+      : parseFloat(n.toFixed(10)).toString();
+    return s;
+  }
+
+  function insert(token){
+    if (justEvaluated){
+      // If starting fresh input after equals with a digit, reset. If operator, chain from result.
+      if (/^[0-9.π]/.test(token) || token === '('){
+        expr = '';
+      }
+      justEvaluated = false;
+    }
+    expr += token;
+    render();
+  }
+
+  function backspace(){
+    justEvaluated = false;
+    expr = expr.slice(0, -1);
+    render();
+  }
+
+  function clearAll(){
+    expr = '';
+    justEvaluated = false;
+    tape.textContent = '\u00A0';
+    render();
+  }
+
+  function factorialWrap(){
+    // append ! to current expression, will be parsed as postfix
+    justEvaluated = false;
+    expr += '!';
+    render();
+  }
+
+  // ---------- Tokenizer ----------
+  function tokenize(str){
+    const s = str.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/π/g,'pi');
+    const tokens = [];
+    let i = 0;
+    while (i < s.length){
+      const c = s[i];
+      if (c === ' '){ i++; continue; }
+      if (/[0-9.]/.test(c)){
+        let num = c; i++;
+        while (i < s.length && /[0-9.]/.test(s[i])){ num += s[i]; i++; }
+        tokens.push({type:'num', value: parseFloat(num)});
+        continue;
+      }
+      if (/[a-zA-Z]/.test(c)){
+        let ident = c; i++;
+        while (i < s.length && /[a-zA-Z]/.test(s[i])){ ident += s[i]; i++; }
+        tokens.push({type:'ident', value: ident});
+        continue;
+      }
+      if ('+-*/^!%(),'.includes(c)){
+        tokens.push({type:'op', value: c});
+        i++;
+        continue;
+      }
+      throw new Error('Unexpected character: ' + c);
+    }
+    return tokens;
+  }
+
+  const FUNCS = new Set(['sin','cos','tan','asin','acos','atan','ln','log','sqrt']);
+  const CONSTS = { pi: Math.PI, e: Math.E };
+
+  function toRPN(tokens){
+    const output = [];
+    const stack = [];
+    const prec = { 'u-':4, '^':4, '*':3, '/':3, '+':2, '-':2 };
+    const rightAssoc = { '^':true, 'u-':true };
+
+    let prevType = null; // track for unary minus detection
+
+    for (let idx=0; idx<tokens.length; idx++){
+      const t = tokens[idx];
+
+      if (t.type === 'num'){
+        output.push({type:'num', value:t.value});
+        prevType = 'num';
+        continue;
+      }
+      if (t.type === 'ident'){
+        if (CONSTS.hasOwnProperty(t.value)){
+          output.push({type:'num', value: CONSTS[t.value]});
+          prevType = 'num';
+        } else if (FUNCS.has(t.value)){
+          stack.push({type:'func', value:t.value});
+          prevType = 'func';
+        } else {
+          throw new Error('Unknown identifier: ' + t.value);
+        }
+        continue;
+      }
+      if (t.type === 'op'){
+        const v = t.value;
+        if (v === '('){
+          stack.push({type:'paren', value:'('});
+          prevType = '(';
+          continue;
+        }
+        if (v === ')'){
+          while (stack.length && stack[stack.length-1].value !== '('){
+            output.push(stack.pop());
+          }
+          if (!stack.length) throw new Error('Mismatched parentheses');
+          stack.pop(); // remove '('
+          if (stack.length && stack[stack.length-1].type === 'func'){
+            output.push(stack.pop());
+          }
+          prevType = 'num';
+          continue;
+        }
+        if (v === '!' || v === '%'){
+          // postfix — pop equal/higher precedence first (there won't usually be any), then emit directly
+          output.push({type:'postfix', value:v});
+          prevType = 'num';
+          continue;
+        }
+        // determine unary minus
+        let opName = v;
+        if (v === '-' && (prevType === null || prevType === 'op' || prevType === '(' )){
+          opName = 'u-';
+        }
+        if (v === '+' && (prevType === null || prevType === 'op' || prevType === '(')){
+          // unary plus: no-op, skip token
+          prevType = 'op';
+          continue;
+        }
+        while (stack.length){
+          const top = stack[stack.length-1];
+          if (top.type === 'func'){ output.push(stack.pop()); continue; }
+          if (top.type === 'op' && (
+                (prec[top.value] > prec[opName]) ||
+                (prec[top.value] === prec[opName] && !rightAssoc[opName])
+              )){
+            output.push(stack.pop());
+            continue;
+          }
+          break;
+        }
+        stack.push({type:'op', value:opName});
+        prevType = 'op';
+        continue;
+      }
+    }
+    while (stack.length){
+      const top = stack.pop();
+      if (top.value === '(' ) throw new Error('Mismatched parentheses');
+      output.push(top);
+    }
+    return output;
+  }
+
+  function toRad(x){ return angleMode === 'deg' ? x * Math.PI/180 : x; }
+  function fromRad(x){ return angleMode === 'deg' ? x * 180/Math.PI : x; }
+
+  function factorial(n){
+    if (n < 0 || !Number.isInteger(n)) throw new Error('Invalid factorial');
+    if (n > 170) return Infinity;
+    let r = 1;
+    for (let k=2;k<=n;k++) r *= k;
+    return r;
+  }
+
+  function evalRPN(rpn){
+    const st = [];
+    for (const t of rpn){
+      if (t.type === 'num'){ st.push(t.value); continue; }
+      if (t.type === 'postfix'){
+        const a = st.pop();
+        if (t.value === '!') st.push(factorial(a));
+        else if (t.value === '%') st.push(a/100);
+        continue;
+      }
+      if (t.type === 'func'){
+        const a = st.pop();
+        let r;
+        switch(t.value){
+          case 'sin': r = Math.sin(toRad(a)); break;
+          case 'cos': r = Math.cos(toRad(a)); break;
+          case 'tan': r = Math.tan(toRad(a)); break;
+          case 'asin': r = fromRad(Math.asin(a)); break;
+          case 'acos': r = fromRad(Math.acos(a)); break;
+          case 'atan': r = fromRad(Math.atan(a)); break;
+          case 'ln': r = Math.log(a); break;
+          case 'log': r = Math.log10(a); break;
+          case 'sqrt': r = Math.sqrt(a); break;
+          default: throw new Error('Unknown fn');
+        }
+        st.push(r);
+        continue;
+      }
+      if (t.type === 'op'){
+        if (t.value === 'u-'){
+          const a = st.pop();
+          st.push(-a);
+          continue;
+        }
+        const b = st.pop(), a = st.pop();
+        let r;
+        switch(t.value){
+          case '+': r = a+b; break;
+          case '-': r = a-b; break;
+          case '*': r = a*b; break;
+          case '/': r = a/b; break;
+          case '^': r = Math.pow(a,b); break;
+          default: throw new Error('Unknown op');
+        }
+        st.push(r);
+        continue;
+      }
+    }
+    if (st.length !== 1) throw new Error('Malformed expression');
+    return st[0];
+  }
+
+  function evaluate(){
+    if (!expr.trim()) return;
+    try {
+      const tokens = tokenize(expr);
+      const rpn = toRPN(tokens);
+      const result = evalRPN(rpn);
+      const resStr = trimNum(result);
+      tape.textContent = expr + ' =';
+      pushHistory(expr, resStr);
+      expr = resStr;
+      justEvaluated = true;
+      render();
+    } catch(e){
+      setError('Error');
+    }
+  }
+
+  function pushHistory(e, r){
+    history.push({expr:e, result:r});
+    if (history.length > 30) history.shift();
+    renderHistory();
+  }
+
+  function renderHistory(){
+    if (!history.length){
+      historyList.innerHTML = '<div class="history-empty">No calculations yet</div>';
+      return;
+    }
+    historyList.innerHTML = history.slice(-12).map(h =>
+      `<div class="history-item" data-load="${h.result}">
+         <span>${escapeHtml(h.expr)}</span>
+         <span class="res">${escapeHtml(h.result)}</span>
+       </div>`
+    ).join('');
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  historyList.addEventListener('click', (e)=>{
+    const item = e.target.closest('.history-item');
+    if (!item) return;
+    expr = item.dataset.load;
+    justEvaluated = true;
+    render();
+  });
+
+  document.getElementById('clear-history').addEventListener('click', ()=>{
+    history = [];
+    renderHistory();
+  });
+
+  // ---------- Memory ----------
+  function currentValueOrEval(){
+    try {
+      const tokens = tokenize(expr || '0');
+      const rpn = toRPN(tokens);
+      return evalRPN(rpn);
+    } catch(e){ return null; }
+  }
+
+  function mplus(){
+    const v = currentValueOrEval();
+    if (v !== null){ memory += v; render(); }
+  }
+  function mminus(){
+    const v = currentValueOrEval();
+    if (v !== null){ memory -= v; render(); }
+  }
+  function mr(){
+    insert(trimNum(memory));
+  }
+  function mc(){
+    memory = 0;
+    render();
+  }
+
+  // ---------- Angle switch ----------
+  angleSwitch.addEventListener('click', ()=>{
+    angleMode = angleMode === 'deg' ? 'rad' : 'deg';
+    angleSwitch.classList.toggle('rad', angleMode === 'rad');
+    degLabel.style.opacity = angleMode === 'deg' ? 1 : 0.4;
+    radLabel.style.opacity = angleMode === 'rad' ? 1 : 0.4;
+    render();
+  });
+
+  // ---------- Button wiring ----------
+  keypad.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button.key');
+    if (!btn) return;
+    const act = btn.dataset.act;
+    const ins = btn.dataset.ins;
+    const fn = btn.dataset.fn;
+
+    if (fn){ insert(fn); return; }
+    if (ins !== undefined){ insert(ins); return; }
+    switch(act){
+      case 'clear': clearAll(); break;
+      case 'backspace': backspace(); break;
+      case 'equals': evaluate(); break;
+      case 'fact': factorialWrap(); break;
+      case 'mplus': mplus(); break;
+      case 'mminus': mminus(); break;
+      case 'mr': mr(); break;
+      case 'mc': mc(); break;
+    }
+  });
+
+  // ---------- Keyboard support ----------
+  window.addEventListener('keydown', (e)=>{
+    const k = e.key;
+    if (/[0-9.]/.test(k)){ insert(k); return; }
+    if (k === '+'){ insert('+'); return; }
+    if (k === '-'){ insert('−'); return; }
+    if (k === '*'){ insert('×'); return; }
+    if (k === '/'){ e.preventDefault(); insert('÷'); return; }
+    if (k === '^'){ insert('^'); return; }
+    if (k === '('){ insert('('); return; }
+    if (k === ')'){ insert(')'); return; }
+    if (k === '%'){ insert('%'); return; }
+    if (k === '!'){ factorialWrap(); return; }
+    if (k === 'Enter' || k === '='){ e.preventDefault(); evaluate(); return; }
+    if (k === 'Backspace'){ backspace(); return; }
+    if (k === 'Escape'){ clearAll(); return; }
+  });
+
+  render();
+  renderHistory();
+
+  // ---------- Scan a question (camera + OCR) ----------
+  const scanModal = document.getElementById('scan-modal');
+  const openScanBtn = document.getElementById('open-scan');
+  const scanCloseBtn = document.getElementById('scan-close');
+  const scanCancelBtn = document.getElementById('scan-cancel');
+  const scanCaptureBtn = document.getElementById('scan-capture');
+  const scanCaptureRow = document.getElementById('scan-capture-row');
+  const scanStatus = document.getElementById('scan-status');
+  const scanHint = document.getElementById('scan-hint');
+  const scanVideo = document.getElementById('scan-video');
+  const scanCanvas = document.getElementById('scan-canvas');
+  const scanReview = document.getElementById('scan-review');
+  const scanText = document.getElementById('scan-text');
+  const scanRetakeBtn = document.getElementById('scan-retake');
+  const scanSolveBtn = document.getElementById('scan-solve');
+
+  let scanStream = null;
+  let tesseractWorker = null;
+  let tesseractLoading = null;
+
+  function loadTesseractScript(){
+    if (window.Tesseract) return Promise.resolve();
+    if (tesseractLoading) return tesseractLoading;
+    tesseractLoading = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+      s.onload = resolve;
+      s.onerror = () => reject(new Error('Could not load OCR engine — check your connection.'));
+      document.head.appendChild(s);
+    });
+    return tesseractLoading;
+  }
+
+  async function getTesseractWorker(){
+    if (tesseractWorker) return tesseractWorker;
+    await loadTesseractScript();
+    tesseractWorker = await Tesseract.createWorker('eng');
+    return tesseractWorker;
+  }
+
+  function resetScanUI(){
+    scanCaptureRow.style.display = 'flex';
+    scanReview.style.display = 'none';
+    scanStatus.textContent = '';
+    scanHint.style.display = 'block';
+    scanVideo.style.display = 'block';
+    scanCanvas.style.display = 'none';
+  }
+
+  async function openScan(){
+    resetScanUI();
+    scanModal.classList.add('open');
+    try {
+      scanStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+      scanVideo.srcObject = scanStream;
+    } catch (err) {
+      scanStatus.textContent = 'Camera access denied or unavailable. Check site permissions.';
+    }
+  }
+
+  function stopScan(){
+    if (scanStream){
+      scanStream.getTracks().forEach(t => t.stop());
+      scanStream = null;
+    }
+    scanModal.classList.remove('open');
+  }
+
+  function cleanOcrText(raw){
+    let t = raw.replace(/\r?\n/g, ' ').trim();
+    // common OCR confusions in math contexts
+    t = t.replace(/[oO](?=[\d.]|$)/g, m => '0');
+    t = t.replace(/(?<=[\d.])[oO]/g, '0');
+    t = t.replace(/[lI](?=[\d.]|$)/g, '1');
+    t = t.replace(/(?<=[\d.])[lI]/g, '1');
+    t = t.replace(/\s*x\s*/gi, ' × ');
+    t = t.replace(/[÷/]/g, ' ÷ ');
+    t = t.replace(/\*/g, ' × ');
+    t = t.replace(/–|—/g, '-');
+    t = t.replace(/\s*-\s*/g, ' - ');
+    t = t.replace(/\s*\+\s*/g, ' + ');
+    // strip characters that aren't plausible in a math expression
+    t = t.replace(/[^0-9+\-×÷.() ^!%πe]/gi, '');
+    t = t.replace(/\s+/g, ' ').trim();
+    t = t.replace(/\s*([+\-×÷^()])\s*/g, '$1');
+    return t;
+  }
+
+  async function runOcr(){
+    scanCaptureRow.style.display = 'none';
+    scanHint.style.display = 'none';
+    scanStatus.textContent = 'Reading the image…';
+
+    const vw = scanVideo.videoWidth, vh = scanVideo.videoHeight;
+    scanCanvas.width = vw;
+    scanCanvas.height = vh;
+    const ctx = scanCanvas.getContext('2d');
+    ctx.drawImage(scanVideo, 0, 0, vw, vh);
+
+    scanVideo.style.display = 'none';
+    scanCanvas.style.display = 'block';
+
+    if (scanStream){
+      scanStream.getTracks().forEach(t => t.stop());
+      scanStream = null;
+    }
+
+    try {
+      const worker = await getTesseractWorker();
+      scanStatus.textContent = 'Recognizing text…';
+      const { data: { text } } = await worker.recognize(scanCanvas);
+      const cleaned = cleanOcrText(text);
+      scanStatus.textContent = cleaned
+        ? 'Got it — check the expression below before solving.'
+        : 'Could not make out a clear expression — try editing it, or retake.';
+      scanText.value = cleaned;
+      scanReview.style.display = 'block';
+    } catch (err){
+      scanStatus.textContent = err.message || 'OCR failed — try again with better lighting.';
+      scanReview.style.display = 'block';
+      scanText.value = '';
+    }
+  }
+
+  openScanBtn.addEventListener('click', openScan);
+  scanCloseBtn.addEventListener('click', stopScan);
+  scanCancelBtn.addEventListener('click', stopScan);
+  scanCaptureBtn.addEventListener('click', runOcr);
+
+  scanRetakeBtn.addEventListener('click', async () => {
+    resetScanUI();
+    try {
+      scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      scanVideo.srcObject = scanStream;
+    } catch (err) {
+      scanStatus.textContent = 'Camera access denied or unavailable.';
+    }
+  });
+
+  scanSolveBtn.addEventListener('click', () => {
+    const val = scanText.value.trim();
+    if (!val) return;
+    expr = val;
+    justEvaluated = false;
+    render();
+    stopScan();
+    evaluate();
+  });
+})();
+
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{ /* not fatal */ });
+  });
+}
+</script>
+</body>
+</html>
