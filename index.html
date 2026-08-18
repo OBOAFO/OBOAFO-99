@@ -296,6 +296,152 @@
   @media (max-width:400px){
     .lcd-main{font-size:30px;}
   }
+
+  /* Scan button */
+  .scan-row{
+    padding:2px 6px 10px;
+  }
+  button.scan-btn{
+    width:100%;
+    border:none;
+    border-radius:10px;
+    padding:11px 0;
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:13px;
+    letter-spacing:0.04em;
+    color:#F4F6ED;
+    background:linear-gradient(160deg, #6a9c95, var(--accent-teal-dim));
+    box-shadow:0 2px 0 #1c1b20, 0 3px 4px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  button.scan-btn:active{transform:translateY(2px); box-shadow:0 0 0 #1c1b20, inset 0 2px 4px rgba(0,0,0,0.4);}
+
+  /* Camera modal */
+  .scan-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(10,9,12,0.92);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    padding:20px;
+  }
+  .scan-modal.open{display:flex;}
+  .scan-panel{
+    width:100%;
+    max-width:360px;
+    background:var(--bg-case);
+    border-radius:18px;
+    padding:16px;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.7);
+  }
+  .scan-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+  }
+  .scan-title{
+    font-family:var(--sans);
+    font-weight:700;
+    font-size:13px;
+    color:var(--key-text);
+    letter-spacing:0.05em;
+  }
+  .scan-close{
+    background:none;
+    border:none;
+    color:#8E8B92;
+    font-size:20px;
+    cursor:pointer;
+    line-height:1;
+    padding:4px 8px;
+  }
+  .scan-video-wrap{
+    position:relative;
+    border-radius:12px;
+    overflow:hidden;
+    background:#000;
+    aspect-ratio:4/3;
+  }
+  #scan-video, #scan-canvas{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  #scan-canvas{display:none;}
+  .scan-hint{
+    font-family:var(--mono);
+    font-size:10px;
+    color:#8E8B92;
+    text-align:center;
+    margin-top:8px;
+    line-height:1.5;
+  }
+  .scan-actions{
+    display:flex;
+    gap:8px;
+    margin-top:12px;
+  }
+  .scan-actions button{
+    flex:1;
+    border:none;
+    border-radius:10px;
+    padding:11px 0;
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .scan-capture{
+    background:linear-gradient(160deg, #EEB877, var(--accent-amber-dim));
+    color:#2A1B08;
+  }
+  .scan-cancel{
+    background:var(--key-dark);
+    color:var(--key-text);
+  }
+  .scan-status{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--accent-teal);
+    text-align:center;
+    margin-top:10px;
+    min-height:14px;
+  }
+  .scan-review textarea{
+    width:100%;
+    margin-top:10px;
+    background:var(--lcd-bg);
+    color:var(--lcd-fg);
+    border:none;
+    border-radius:8px;
+    padding:10px;
+    font-family:var(--mono);
+    font-size:15px;
+    resize:none;
+    height:52px;
+  }
+  .scan-review-actions{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+  }
+  .scan-solve{
+    background:linear-gradient(160deg, #EEB877, var(--accent-amber-dim));
+    color:#2A1B08;
+  }
+  .scan-retake{
+    background:var(--key-dark);
+    color:var(--key-text);
+  }
 </style>
 </head>
 <body>
@@ -326,6 +472,10 @@
       <span id="rad-label" style="opacity:0.4">RAD</span>
     </div>
     <div class="mem-indicator" id="mem-label">MEMORY 0</div>
+  </div>
+
+  <div class="scan-row">
+    <button class="scan-btn" id="open-scan">📷 SCAN A QUESTION</button>
   </div>
 
   <div class="keypad" id="keypad">
@@ -384,6 +534,37 @@
     </div>
     <div class="history-list" id="history-list">
       <div class="history-empty">No calculations yet</div>
+    </div>
+  </div>
+</div>
+
+<div class="scan-modal" id="scan-modal">
+  <div class="scan-panel">
+    <div class="scan-head">
+      <span class="scan-title">SCAN A QUESTION</span>
+      <button class="scan-close" id="scan-close">✕</button>
+    </div>
+
+    <div class="scan-video-wrap">
+      <video id="scan-video" autoplay playsinline muted></video>
+      <canvas id="scan-canvas"></canvas>
+    </div>
+
+    <div class="scan-hint" id="scan-hint">Fill the frame with one printed expression, hold steady, good lighting.</div>
+
+    <div class="scan-actions" id="scan-capture-row">
+      <button class="scan-cancel" id="scan-cancel">Cancel</button>
+      <button class="scan-capture" id="scan-capture">Capture</button>
+    </div>
+
+    <div class="scan-status" id="scan-status"></div>
+
+    <div class="scan-review" id="scan-review" style="display:none">
+      <textarea id="scan-text" spellcheck="false"></textarea>
+      <div class="scan-review-actions">
+        <button class="scan-retake" id="scan-retake">Retake</button>
+        <button class="scan-solve" id="scan-solve">Insert &amp; Solve</button>
+      </div>
     </div>
   </div>
 </div>
@@ -781,6 +962,157 @@
 
   render();
   renderHistory();
+
+  // ---------- Scan a question (camera + OCR) ----------
+  const scanModal = document.getElementById('scan-modal');
+  const openScanBtn = document.getElementById('open-scan');
+  const scanCloseBtn = document.getElementById('scan-close');
+  const scanCancelBtn = document.getElementById('scan-cancel');
+  const scanCaptureBtn = document.getElementById('scan-capture');
+  const scanCaptureRow = document.getElementById('scan-capture-row');
+  const scanStatus = document.getElementById('scan-status');
+  const scanHint = document.getElementById('scan-hint');
+  const scanVideo = document.getElementById('scan-video');
+  const scanCanvas = document.getElementById('scan-canvas');
+  const scanReview = document.getElementById('scan-review');
+  const scanText = document.getElementById('scan-text');
+  const scanRetakeBtn = document.getElementById('scan-retake');
+  const scanSolveBtn = document.getElementById('scan-solve');
+
+  let scanStream = null;
+  let tesseractWorker = null;
+  let tesseractLoading = null;
+
+  function loadTesseractScript(){
+    if (window.Tesseract) return Promise.resolve();
+    if (tesseractLoading) return tesseractLoading;
+    tesseractLoading = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+      s.onload = resolve;
+      s.onerror = () => reject(new Error('Could not load OCR engine — check your connection.'));
+      document.head.appendChild(s);
+    });
+    return tesseractLoading;
+  }
+
+  async function getTesseractWorker(){
+    if (tesseractWorker) return tesseractWorker;
+    await loadTesseractScript();
+    tesseractWorker = await Tesseract.createWorker('eng');
+    return tesseractWorker;
+  }
+
+  function resetScanUI(){
+    scanCaptureRow.style.display = 'flex';
+    scanReview.style.display = 'none';
+    scanStatus.textContent = '';
+    scanHint.style.display = 'block';
+    scanVideo.style.display = 'block';
+    scanCanvas.style.display = 'none';
+  }
+
+  async function openScan(){
+    resetScanUI();
+    scanModal.classList.add('open');
+    try {
+      scanStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+      scanVideo.srcObject = scanStream;
+    } catch (err) {
+      scanStatus.textContent = 'Camera access denied or unavailable. Check site permissions.';
+    }
+  }
+
+  function stopScan(){
+    if (scanStream){
+      scanStream.getTracks().forEach(t => t.stop());
+      scanStream = null;
+    }
+    scanModal.classList.remove('open');
+  }
+
+  function cleanOcrText(raw){
+    let t = raw.replace(/\r?\n/g, ' ').trim();
+    // common OCR confusions in math contexts
+    t = t.replace(/[oO](?=[\d.]|$)/g, m => '0');
+    t = t.replace(/(?<=[\d.])[oO]/g, '0');
+    t = t.replace(/[lI](?=[\d.]|$)/g, '1');
+    t = t.replace(/(?<=[\d.])[lI]/g, '1');
+    t = t.replace(/\s*x\s*/gi, ' × ');
+    t = t.replace(/[÷/]/g, ' ÷ ');
+    t = t.replace(/\*/g, ' × ');
+    t = t.replace(/–|—/g, '-');
+    t = t.replace(/\s*-\s*/g, ' - ');
+    t = t.replace(/\s*\+\s*/g, ' + ');
+    // strip characters that aren't plausible in a math expression
+    t = t.replace(/[^0-9+\-×÷.() ^!%πe]/gi, '');
+    t = t.replace(/\s+/g, ' ').trim();
+    t = t.replace(/\s*([+\-×÷^()])\s*/g, '$1');
+    return t;
+  }
+
+  async function runOcr(){
+    scanCaptureRow.style.display = 'none';
+    scanHint.style.display = 'none';
+    scanStatus.textContent = 'Reading the image…';
+
+    const vw = scanVideo.videoWidth, vh = scanVideo.videoHeight;
+    scanCanvas.width = vw;
+    scanCanvas.height = vh;
+    const ctx = scanCanvas.getContext('2d');
+    ctx.drawImage(scanVideo, 0, 0, vw, vh);
+
+    scanVideo.style.display = 'none';
+    scanCanvas.style.display = 'block';
+
+    if (scanStream){
+      scanStream.getTracks().forEach(t => t.stop());
+      scanStream = null;
+    }
+
+    try {
+      const worker = await getTesseractWorker();
+      scanStatus.textContent = 'Recognizing text…';
+      const { data: { text } } = await worker.recognize(scanCanvas);
+      const cleaned = cleanOcrText(text);
+      scanStatus.textContent = cleaned
+        ? 'Got it — check the expression below before solving.'
+        : 'Could not make out a clear expression — try editing it, or retake.';
+      scanText.value = cleaned;
+      scanReview.style.display = 'block';
+    } catch (err){
+      scanStatus.textContent = err.message || 'OCR failed — try again with better lighting.';
+      scanReview.style.display = 'block';
+      scanText.value = '';
+    }
+  }
+
+  openScanBtn.addEventListener('click', openScan);
+  scanCloseBtn.addEventListener('click', stopScan);
+  scanCancelBtn.addEventListener('click', stopScan);
+  scanCaptureBtn.addEventListener('click', runOcr);
+
+  scanRetakeBtn.addEventListener('click', async () => {
+    resetScanUI();
+    try {
+      scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      scanVideo.srcObject = scanStream;
+    } catch (err) {
+      scanStatus.textContent = 'Camera access denied or unavailable.';
+    }
+  });
+
+  scanSolveBtn.addEventListener('click', () => {
+    const val = scanText.value.trim();
+    if (!val) return;
+    expr = val;
+    justEvaluated = false;
+    render();
+    stopScan();
+    evaluate();
+  });
 })();
 
 if ('serviceWorker' in navigator){
